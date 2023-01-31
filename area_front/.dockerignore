@@ -1,0 +1,9 @@
+.dockerignore
+Dockerfile
+Dockerfile-mobile
+
+ios/
+build/
+.dart_tool/
+android/.gradle/
+README.md

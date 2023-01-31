@@ -1,0 +1,12 @@
+FROM cirrusci/flutter:stable AS build
+WORKDIR /usr/src/build
+COPY . .
+RUN flutter pub get
+RUN flutter build apk
+
+FROM alpine:latest AS prod
+WORKDIR /usr/src/app
+RUN mkdir /usr/src/build
+RUN ls .
+COPY --from=build /usr/src/build/build/app/outputs/flutter-apk/app-release.apk /usr/src/build/.
+CMD ["cp", "/usr/src/build/app-release.apk", "/usr/src/app/client.apk"]

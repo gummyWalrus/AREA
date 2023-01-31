@@ -1,0 +1,11 @@
+.dockerignore
+.env
+Dockerfile
+nest-cli.json
+README.md
+
+register-data.js
+register-data.ts
+
+dist/
+node_modules/

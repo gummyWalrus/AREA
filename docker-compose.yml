@@ -1,0 +1,83 @@
+version: "3.5"
+
+
+services:
+
+  server:
+    build: area-server
+    ports:
+      - 8080:8080
+    restart: always
+    environment:
+      MONGODB_URL: "mongodb://root:<MONGODB_PASSWORD>@mongo:27017"
+      MONGDB_NAME: area
+      SECRET_KEY: <A_RANDOM_STRING_SERVING_AS_SECRET_KEY>
+      TWILIO_ACCOUNT_SID: <YOUR_TWILIO_ACCOUNT_SID>
+      TWILIO_AUTH_TOKEN: <YOUR_TWILIO_AUTHENTICATION_TOKEN>
+      ADMIN_TOKEN: <A_RANDOM_STRING_SERVING_AS_A_TOKEN_FOR_ADMIN_REQUESTS>
+      TWITTER_KEY: <YOUR_TWITTER_API_KEY>
+      TWITTER_SECRET: <YOUR_TWITTER_API_SECRET>
+      OAUTH_TWITTER_CLIENT_ID: <YOUR_TWITTER_OAUTH2_CLIENT_ID>
+      OAUTH_TWITTER_CLIENT_SECRET: <YOUR_TWITTER_OAUTH2_CLIENT_SECRET>
+      OAUTH_TWITTER_REDIRECT_URL: http://localhost:8080/auth/twitter/redirect # Dont forget to add this to your twitter dev portal
+      GITHUB_WEBHOOK_URL: <AN_URL_CONFIGURED_WITH_HOOKDECK_OR_NGROK>
+      GITHUB_TOKEN: <YOUR_GITHUB_API_TOKEN>
+      OAUTH_GOOGLE_ID: <YOUR_GOOGLE_ID_PREFIX>.apps.googleusercontent.com
+      OAUTH_GOOGLE_SECRET: <YOUR_GOOGLE_OAUTH2_CLIENT_SECRET>
+      OAUTH_GOOGLE_REDIRECT_URL: http://localhost:8080/auth/google/redirect
+      OAUTH_GITHUB_CLIENT_ID: <YOUR_GITHUB_OAUTH2_CLIENT_ID>
+      OAUTH_GITHUB_CLIENT_SECRET: <YOUR_GITHUB_OAUTH2_CLIENT_SECRET>
+      OAUTH_GITHUB_REDIRECT_URL: http://localhost:8080/auth/github/redirect
+      FRONT_URL: http://localhost:8081
+      DISCORD_CLIENT_ID: <YOUR_DISCORD_OAUTH2_CLIENT_ID>
+      DISCORD_CLIENT_SECRET: <YOUR_DISCORD_OAUTH2_CLIENT_SECRET>
+      DISCORD_REDIRECT_URL: http://localhost:8080/auth/discord/redirect
+      TELEGRAM_BOT_TOKEN: <YOUR_TELEGRAM_BOT_TOKEN>
+      DISCORD_BOT_TOKEN: <YOUR_DISCORD_BOT_TOKEN>
+      DISCORD_BOT_ID: <YOUR_DISCORD_BOT_ID>
+
+  client_mobile:
+    build:
+      context: area_front
+      dockerfile: Dockerfile-mobile
+    volumes:
+      - apk-volume:/usr/src/app
+
+
+  client_web:
+    build: area_front
+    volumes:
+      - apk-volume:/usr/src/apk
+    restart: always
+    ports:
+      - 8081:8081
+    depends_on:
+      - client_mobile
+      - server
+      - mongo
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: <MONGODB_PASSWORD>
+    volumes:
+      - ./mongo-data:/data/db
+
+  
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 3000:3000
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: <MONGODB_PASSWORD>
+      ME_CONFIG_MONGODB_URL: "mongodb://root:<MONGODB_PASSWORD>@mongo:27017/"
+      VCAP_APP_PORT: "3000"
+    depends_on:
+      - mongo
+
+volumes:
+  apk-volume:
